@@ -1,0 +1,4 @@
+beautifulsoup4==4.9.1
+chardet==3.0.4
+lxml==4.5.2
+soupsieve==2.0.1
