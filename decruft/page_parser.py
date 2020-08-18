@@ -1,5 +1,5 @@
 import re
-from BeautifulSoup import HTMLParseError, UnicodeDammit
+from bs4 import BeautifulSoup, UnicodeDammit
 from logging import error
 import lxml.html as html
 from lxml.etree import tostring
@@ -16,15 +16,16 @@ class Unparseable(ValueError):
 
 def parse(raw_content, base_href=None, notify=lambda *args: None):
     try:
-        content = UnicodeDammit(raw_content, isHTML=True).markup
+        #import pdb;pdb.set_trace()
+        content = UnicodeDammit(raw_content).markup
         cleaned = _remove_crufty_html(content)
         return create_doc(cleaned, base_href)
-    except HTMLParseError, e:
+    except Exception as e:
         notify("parsing failed:", e)
     raise Unparseable()
 
 def get_title(doc):
-    title = unicode(getattr(doc.find('.//title'), 'text', ''))
+    title = str(getattr(doc.find('.//title'), 'text', ''))
     if not title:
         return None
     return normalize_spaces(title)
@@ -32,7 +33,7 @@ def get_title(doc):
 
 def get_body(doc):
     [ elem.drop_tree() for elem in doc.xpath('.//script | .//link | .//style') ]
-    raw_html = unicode(tostring(doc.body or doc))
+    raw_html = str(tostring(doc.body or doc))
     cleaned = clean_attributes(raw_html)
     try:
         #BeautifulSoup(cleaned) #FIXME do we really need to try loading it?

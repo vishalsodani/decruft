@@ -98,7 +98,7 @@ class Document:
                     continue # try again
                 else:
                     return cleaned_article
-        except (StandardError, ParserError), e:
+        except Exception as e:
             #logger.exception('error getting summary: ' + str(traceback.format_exception(*sys.exc_info())))
             logger.exception('error getting summary: ' )
             raise Unparseable(str(e))
@@ -242,7 +242,7 @@ class Document:
         for elem in self.html.iter():
             if elem.tag.lower() == "div":
                 # transform <div>s that do not contain other block elements into <p>s
-                if not REGEXES['divToPElementsRe'].search(unicode(''.join(map(tostring, list(elem))))):
+                if not REGEXES['divToPElementsRe'].search(str(b''.join(map(tostring, list(elem))))):
                     self.debug("Altering div(#%s.%s) to p" % (elem.get('id', ''), elem.get('class', '')))
                     elem.tag = "p"
 
@@ -435,8 +435,8 @@ def main():
 
     file = None
     if options.url:
-        import urllib
-        file = urllib.urlopen(options.url)
+        import urllib.request
+        file = urllib.request.urlopen(options.url)
     else:
         file = open(args[0])
     try:
@@ -446,8 +446,9 @@ def main():
             enc = chardet.detect(content)['encoding']
             content = content.decode(enc)
         except:
-            pass
-        print Document(content, debug=options.verbose).summary().encode('utf-8','ignore')
+            import traceback
+            traceback.print_exc()
+        print (Document(content, debug=options.verbose).summary().encode('utf-8','ignore'))
     finally:
         file.close()
 
